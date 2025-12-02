@@ -1,6 +1,7 @@
 #ifndef FILMESH
 #define FILMESH
 #include <stdio.h>
+#include <stdbool.h>
 
 #define MAXFILMES 2000
 #define MAXTITLE 128
@@ -19,7 +20,7 @@ typedef struct Filme {
     int year;
     int duration;
     float rating;
-    int favorite;
+    bool favorite;
     float revenue;
 } Filme;
 
