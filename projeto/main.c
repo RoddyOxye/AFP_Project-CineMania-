@@ -92,6 +92,5 @@ int main() {
         }
     }
 
-    //ggg
     return 0;
 }
