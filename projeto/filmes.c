@@ -90,24 +90,35 @@ void listarTodos(Filme *colecao, int count, int orden) {
 
             int troca = 0;
 
-            if (orden == 0 && copia[j].code > copia[j + 1].code)
-                troca = 1;
+            if (orden == 0) {
+                if (copia[j].code > copia[j+1].code) troca = 1;
+            }
+            else if (orden == 1) {
+                if (copia[j].rating < copia[j+1].rating) troca = 1;
+            }
+            else if (orden == 2) {
+                if (strcasecmp(copia[j].title, copia[j+1].title) > 0) troca = 1;
+            }
 
-            if (orden == 1 && copia[j].rating < copia[j + 1].rating)
-                troca = 1;
-
-            if (orden == 2 && strcmp(copia[j].title, copia[j + 1].title) > 0)
-                troca = 1;
-
-            if (troca)
-                swapFilmes(&copia[j], &copia[j + 1]);
+            if (troca) {
+                Filme temp = copia[j];
+                copia[j] = copia[j+1];
+                copia[j+1] = temp;
+            }
         }
     }
 
-    printf("\nCode | Title\n");
-    for (int i = 0; i < count; i++)
-        printf("%4d | %s\n", copia[i].code, copia[i].title);
+    printf("\n--- LISTA DE FILMES (%d encontrados) ---\n", count);
+    for (int i = 0; i < count; i++) {
+        printf("%4d | %s | %d | %.1f\n",
+            copia[i].code,
+            copia[i].title,
+            copia[i].year,
+            copia[i].rating
+        );
+    }
 }
+
 
 int pesquisarTitulo(Filme *colecao, int count, const char *substr) {
     int found = 0;
