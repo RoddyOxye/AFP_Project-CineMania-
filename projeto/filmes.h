@@ -24,7 +24,6 @@ typedef struct Filme {
     float revenue;
 } Filme;
 
-
 void inicializarColecao(Filme *colecao, int *count);
 
 int adicionarFilme(Filme *colecao, int *count, const Filme *novo);
@@ -34,11 +33,8 @@ int consultarCode(Filme *colecao, int count, int code);
 void listarTodos(Filme *colecao, int count, int orden);
 
 int pesquisarTitulo(Filme *colecao, int count, const char *substr);
-
 int pesquisarGenero(Filme *colecao, int count, const char *genre);
-
 int pesquisarRealizador(Filme *colecao, int count, const char *director);
-
 int pesquisarAtor(Filme *colecao, int count, const char *actor);
 
 #endif

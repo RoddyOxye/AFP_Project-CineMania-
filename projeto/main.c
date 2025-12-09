@@ -22,17 +22,14 @@ float lerFloat(const char *msg) {
 }
 
 int main() {
+
     Filme lista[MAXFILMES];
     int n;
     inicializarColecao(lista, &n);
 
-    char op[8];
+    char op[16];
 
     while (1) {
-        printf("  ____ ______  ___  ______________ _____  ______ _\n");
-        printf(" / __// / __ \\/ _ \\/ __  __  / __ `/ __ \\/ / __ `/\n");
-        printf("/ /__/ / / / /  __/ / / / / / /_/ / / / / / /_/ /\n");
-        printf("\\___/_/_/ /_/\\___/_/ /_/ /_/\\__,_/_/ /_/_/\\__,_/\n");
         printf("\n=== MENU ===\n");
         printf("1. Listar filmes\n");
         printf("2. Pesquisar filmes\n");
@@ -42,14 +39,14 @@ int main() {
 
         lerString("Opcao: ", op, sizeof(op));
 
-        if (strcmp(op, "0") == 0) break;
+        if (!strcmp(op, "0")) break;
 
-        else if (strcmp(op, "1") == 0) {
+        else if (!strcmp(op, "1")) {
             int ord = lerInt("Ordenar (0=code, 1=rating, 2=title): ");
             listarTodos(lista, n, ord);
         }
 
-        else if (strcmp(op, "2") == 0) {
+        else if (!strcmp(op, "2")) {
             char txt[128];
             printf("a) Titulo\nb) Genero\nc) Realizador\nd) Ator\n");
             lerString("Escolha: ", op, sizeof(op));
@@ -62,12 +59,12 @@ int main() {
             else printf("Opcao invalida.\n");
         }
 
-        else if (strcmp(op, "3") == 0) {
+        else if (!strcmp(op, "3")) {
             int code = lerInt("Code do filme: ");
             consultarCode(lista, n, code);
         }
 
-        else if (strcmp(op, "4") == 0) {
+        else if (!strcmp(op, "4")) {
             Filme f;
 
             lerString("Titulo: ", f.title, MAXTITLE);
@@ -76,11 +73,11 @@ int main() {
             lerString("Realizador: ", f.director, MAXDIRECTOR);
             lerString("Atores: ", f.actors, MAXACTORS);
 
-            f.year     = lerInt("Ano: ");
+            f.year = lerInt("Ano: ");
             f.duration = lerInt("Duracao: ");
-            f.rating   = lerFloat("Rating: ");
+            f.rating = lerFloat("Rating: ");
 
-            int fav = lerInt("Favorito? (1=sim,0=nao): ");
+            int fav = lerInt("Favorito? (1=Sim, 0=Nao): ");
             f.favorite = (fav == 1);
 
             f.revenue = lerFloat("Receita (M): ");
@@ -88,7 +85,7 @@ int main() {
             if (adicionarFilme(lista, &n, &f))
                 printf("Filme adicionado.\n");
             else
-                printf("Erro: cheio.\n");
+                printf("Erro: lista cheia.\n");
         }
 
         else {

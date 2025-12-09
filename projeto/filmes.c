@@ -2,26 +2,34 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdlib.h>
 
 static void toLowerCopy(const char *src, char *dest, int max) {
     int i;
-    for (i = 0; i < max - 1 && src[i] != '\0'; i++)
+    for (i = 0; i < max - 1 && src[i] != '\0'; i++) {
         dest[i] = (char)tolower((unsigned char)src[i]);
+    }
     dest[i] = '\0';
 }
 
-static int containsCaseInsensitive(const char *field, const char *pattern) {
-    char A[512], B[256];
-    toLowerCopy(field, A, sizeof(A));
-    toLowerCopy(pattern, B, sizeof(B));
-    return strstr(A, B) != NULL;
+static int cmpCaseInsensitive(const char *a, const char *b) {
+    char A[256], B[256];
+    toLowerCopy(a, A, sizeof(A));
+    toLowerCopy(b, B, sizeof(B));
+    return strcmp(A, B);
 }
 
-static void swapFilmes(Filme *a, Filme *b) {
-    Filme tmp = *a;
-    *a = *b;
-    *b = tmp;
+static int containsCaseInsensitive(const char *field, const char *pattern) {
+    char F[512], P[256];
+    toLowerCopy(field, F, sizeof(F));
+    toLowerCopy(pattern, P, sizeof(P));
+    return strstr(F, P) != NULL;
+}
+
+static int indiceCode(Filme *colecao, int count, int code) {
+    for (int i = 0; i < count; i++)
+        if (colecao[i].code == code)
+            return i;
+    return -1;
 }
 
 void inicializarColecao(Filme *colecao, int *count) {
@@ -33,7 +41,8 @@ int adicionarFilme(Filme *colecao, int *count, const Filme *novo) {
 
     int max = 0;
     for (int i = 0; i < *count; i++)
-        if (colecao[i].code > max) max = colecao[i].code;
+        if (colecao[i].code > max)
+            max = colecao[i].code;
 
     Filme f = *novo;
     f.code = max + 1;
@@ -43,17 +52,10 @@ int adicionarFilme(Filme *colecao, int *count, const Filme *novo) {
     return 1;
 }
 
-static int indiceCode(Filme *colecao, int count, int code) {
-    for (int i = 0; i < count; i++)
-        if (colecao[i].code == code)
-            return i;
-    return -1;
-}
-
 int consultarCode(Filme *colecao, int count, int code) {
     int idx = indiceCode(colecao, count, code);
     if (idx < 0) {
-        printf("Filme nao encontrado.\n");
+        printf("Filme não encontrado.\n");
         return 0;
     }
 
@@ -69,7 +71,7 @@ int consultarCode(Filme *colecao, int count, int code) {
     printf("Year: %d\n", f->year);
     printf("Duration: %d min\n", f->duration);
     printf("Rating: %.1f\n", f->rating);
-    printf("Favorite: %s\n", f->favorite ? "Sim" : "Nao");
+    printf("Favorite: %s\n", f->favorite ? "Sim" : "Não");
     printf("Revenue: %.2f M\n", f->revenue);
 
     return 1;
@@ -77,7 +79,7 @@ int consultarCode(Filme *colecao, int count, int code) {
 
 void listarTodos(Filme *colecao, int count, int orden) {
     if (count == 0) {
-        printf("Nenhum filme em memoria.\n");
+        printf("Nenhum filme em memória.\n");
         return;
     }
 
@@ -97,20 +99,21 @@ void listarTodos(Filme *colecao, int count, int orden) {
                 if (copia[j].rating < copia[j+1].rating) troca = 1;
             }
             else if (orden == 2) {
-                if (strcasecmp(copia[j].title, copia[j+1].title) > 0) troca = 1;
+                if (cmpCaseInsensitive(copia[j].title, copia[j+1].title) > 0)
+                    troca = 1;
             }
 
             if (troca) {
-                Filme temp = copia[j];
+                Filme tmp = copia[j];
                 copia[j] = copia[j+1];
-                copia[j+1] = temp;
+                copia[j+1] = tmp;
             }
         }
     }
 
     printf("\n--- LISTA DE FILMES (%d encontrados) ---\n", count);
     for (int i = 0; i < count; i++) {
-        printf("%4d | %s | %d | %.1f\n",
+        printf("%4d | %-30s | %d | %.1f\n",
             copia[i].code,
             copia[i].title,
             copia[i].year,
@@ -118,7 +121,6 @@ void listarTodos(Filme *colecao, int count, int orden) {
         );
     }
 }
-
 
 int pesquisarTitulo(Filme *colecao, int count, const char *substr) {
     int found = 0;
