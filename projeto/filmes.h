@@ -1,6 +1,6 @@
 #ifndef FILMESH
 #define FILMESH
-#include <stdio.h>
+
 #include <stdbool.h>
 
 #define MAXFILMES 2000
@@ -24,27 +24,21 @@ typedef struct Filme {
     float revenue;
 } Filme;
 
-void inicializaColecao(Filme *colecao, int *count);
 
-int adicionaFilme(Filme *colecao, int *count, const Filme *novo);
+void inicializarColecao(Filme *colecao, int *count);
 
-int eliminaFilme(Filme *colecao, int *count, int code);
+int adicionarFilme(Filme *colecao, int *count, const Filme *novo);
 
-void limpaColecao(Filme *colecao, int *count);
+int consultarCode(Filme *colecao, int count, int code);
 
-void listaTodos(Filme *colecao, int count, int orden);
+void listarTodos(Filme *colecao, int count, int orden);
 
-int consultaPorCode(Filme *colecao, int count, int code);
+int pesquisarTitulo(Filme *colecao, int count, const char *substr);
 
-int pesquisaPorTitulo(Filme *colecao, int count, const char *substr);
-int pesquisaPorGenero(Filme *colecao, int count, const char *genre);
-int pesquisaPorRealizador(Filme *colecao, int count, const char *director);
-int pesquisaPorAtor(Filme *colecao, int count, const char *actor);
+int pesquisarGenero(Filme *colecao, int count, const char *genre);
 
-int alteraFilme(Filme *colecao, int count, int code, const Filme *novos);
+int pesquisarRealizador(Filme *colecao, int count, const char *director);
 
-int validaRating(float r);
-int validaYear(int y);
-int validaDuration(int d);
+int pesquisarAtor(Filme *colecao, int count, const char *actor);
 
 #endif
