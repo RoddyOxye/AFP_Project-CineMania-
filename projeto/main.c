@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include "filmes.h"
 
-<<<<<<< HEAD
 void lerString(const char *msg, char *dest, int max) {
     printf("%s", msg);
     fgets(dest, max, stdin);
@@ -100,7 +99,6 @@ int main() {
 
     return 0;
 }
-=======
 int main (){
 
     printf("  ____ ______  ___  ______________ _____  ______ _");
@@ -109,4 +107,3 @@ int main (){
     printf("\___/_/_/ /_/\___/_/ /_/ /_/\__,_/_/ /_/_/\__,_/");
     
 }
->>>>>>> 41f63b4faf869985af5d462a79b9d319aaf43e05
