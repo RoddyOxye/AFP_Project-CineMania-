@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 static void toLowerCopy(const char *src, char *dest, int max) {
     int i;
@@ -83,7 +84,12 @@ void listarTodos(Filme *colecao, int count, int orden) {
         return;
     }
 
-    Filme copia[MAXFILMES];
+    Filme *copia = malloc(sizeof(Filme) * count);
+    if (!copia) {
+        printf("Erro de memória.\n");
+        return;
+    }
+
     for (int i = 0; i < count; i++)
         copia[i] = colecao[i];
 
@@ -120,6 +126,8 @@ void listarTodos(Filme *colecao, int count, int orden) {
             copia[i].rating
         );
     }
+
+    free(copia);
 }
 
 int pesquisarTitulo(Filme *colecao, int count, const char *substr) {
