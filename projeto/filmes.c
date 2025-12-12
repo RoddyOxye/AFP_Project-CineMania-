@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+// Função para converter strings para minúsculas
 static void toLowerCopy(const char *src, char *dest, int max) {
     int i;
     for (i = 0; i < max - 1 && src[i] != '\0'; i++) {
@@ -12,6 +13,7 @@ static void toLowerCopy(const char *src, char *dest, int max) {
     dest[i] = '\0';
 }
 
+// Função para comparar strings sem diferenciar maiúsculas de minúsculas
 static int cmpCaseInsensitive(const char *a, const char *b) {
     char A[256], B[256];
     toLowerCopy(a, A, sizeof(A));
@@ -19,6 +21,7 @@ static int cmpCaseInsensitive(const char *a, const char *b) {
     return strcmp(A, B);
 }
 
+// Função para verificar se uma string contém outra ignorando maiúsculas/minúsculas
 static int containsCaseInsensitive(const char *field, const char *pattern) {
     char F[512], P[256];
     toLowerCopy(field, F, sizeof(F));
@@ -26,6 +29,7 @@ static int containsCaseInsensitive(const char *field, const char *pattern) {
     return strstr(F, P) != NULL;
 }
 
+// Função para encontrar um filme pelo número de código
 static int indiceCode(Filme *colecao, int count, int code) {
     for (int i = 0; i < count; i++)
         if (colecao[i].code == code)
@@ -33,10 +37,12 @@ static int indiceCode(Filme *colecao, int count, int code) {
     return -1;
 }
 
+// Inicializa a coleção de filmes
 void inicializarColecao(Filme *colecao, int *count) {
     *count = 0;
 }
 
+// Adiciona um filme à coleção
 int adicionarFilme(Filme *colecao, int *count, const Filme *novo) {
     if (*count >= MAXFILMES) return 0;
 
@@ -53,10 +59,11 @@ int adicionarFilme(Filme *colecao, int *count, const Filme *novo) {
     return 1;
 }
 
+// Consulta um filme pelo código
 int consultarCode(Filme *colecao, int count, int code) {
     int idx = indiceCode(colecao, count, code);
     if (idx < 0) {
-        printf("Filme não encontrado.\n");
+        printf("\nFilme não encontrado.\n");
         return 0;
     }
 
@@ -78,15 +85,16 @@ int consultarCode(Filme *colecao, int count, int code) {
     return 1;
 }
 
+// Lista todos os filmes dependendo da ordenação
 void listarTodos(Filme *colecao, int count, int orden) {
     if (count == 0) {
-        printf("Nenhum filme em memória.\n");
+        printf("\nNenhum filme em memória.\n");
         return;
     }
 
     Filme *copia = malloc(sizeof(Filme) * count);
     if (!copia) {
-        printf("Erro de memória.\n");
+        printf("\nErro de memória.\n");
         return;
     }
 
@@ -130,6 +138,7 @@ void listarTodos(Filme *colecao, int count, int orden) {
     free(copia);
 }
 
+// Pesquisar filmes pelo título
 int pesquisarTitulo(Filme *colecao, int count, const char *substr) {
     int found = 0;
     for (int i = 0; i < count; i++) {
@@ -138,10 +147,11 @@ int pesquisarTitulo(Filme *colecao, int count, const char *substr) {
             found = 1;
         }
     }
-    if (!found) printf("Nenhum resultado.\n");
+    if (!found) printf("\nNenhum resultado.\n");
     return found;
 }
 
+// Pesquisar filmes pelo género
 int pesquisarGenero(Filme *colecao, int count, const char *genre) {
     int found = 0;
     for (int i = 0; i < count; i++) {
@@ -150,10 +160,11 @@ int pesquisarGenero(Filme *colecao, int count, const char *genre) {
             found = 1;
         }
     }
-    if (!found) printf("Nenhum resultado.\n");
+    if (!found) printf("\nNenhum resultado.\n");
     return found;
 }
 
+// Pesquisar filmes pelo realizador
 int pesquisarRealizador(Filme *colecao, int count, const char *director) {
     int found = 0;
     for (int i = 0; i < count; i++) {
@@ -162,10 +173,11 @@ int pesquisarRealizador(Filme *colecao, int count, const char *director) {
             found = 1;
         }
     }
-    if (!found) printf("Nenhum resultado.\n");
+    if (!found) printf("\nNenhum resultado.\n");
     return found;
 }
 
+// Pesquisar filmes pelo ator
 int pesquisarAtor(Filme *colecao, int count, const char *actor) {
     int found = 0;
     for (int i = 0; i < count; i++) {
@@ -174,6 +186,6 @@ int pesquisarAtor(Filme *colecao, int count, const char *actor) {
             found = 1;
         }
     }
-    if (!found) printf("Nenhum resultado.\n");
+    if (!found) printf("\nNenhum resultado.\n");
     return found;
 }
