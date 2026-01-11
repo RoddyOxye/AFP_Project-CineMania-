@@ -21,12 +21,12 @@ static int contem(const char *campo, const char *pesquisa) {
     return strstr(campoAux, pesquisaAux) != NULL;
 }
 
-void inicializaColecao(Filmes *colecaoFilmes, int *numFilmes) {
+void inicializarColecao(Filmes *colecaoFilmes, int *numFilmes) {
     *numFilmes = 0;
 }
 
 /* Adiciona filme com código automático */
-int adicionaFilme(Filmes *colecaoFilmes, int *numFilmes, Filmes novoFilme) {
+int adicionarFilme(Filmes *colecaoFilmes, int *numFilmes, Filmes novoFilme) {
     if (*numFilmes >= MAX_FILMES) {
         return 0; // Coleção cheia
     }
@@ -103,7 +103,7 @@ int consultarFilme(Filmes *colecaoFilmes, int numFilmes, int code) {
     return 0; // Filme não encontrado
 }
 
-void pesquisaFilmes(Filmes *colecaoFilmes, int numFilmes, int tipoPesquisa, char *pesquisa) {
+void pesquisarFilmes(Filmes *colecaoFilmes, int numFilmes, int tipoPesquisa, char *pesquisa) {
     for (int i = 0; i < numFilmes; i++) {
        if ((tipoPesquisa == 1 && contem(colecaoFilmes[i].title, pesquisa)) ||
            (tipoPesquisa == 2 && contem(colecaoFilmes[i].gender, pesquisa)) ||

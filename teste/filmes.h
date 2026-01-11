@@ -25,9 +25,9 @@ typedef struct
 
 /*Fase 1*/
 
-void inicializaColecao(Filmes *colecaoFilmes, int *numFilmes);
+void inicializarColecao(Filmes *colecaoFilmes, int *numFilmes);
 
-int adicionaFilme(Filmes *colecaoFilmes, int *numFilmes, Filmes novoFilme);
+int adicionarFilme(Filmes *colecaoFilmes, int *numFilmes, Filmes novoFilme);
 
 void listarFilmes(Filmes *colecaoFilmes, int numFilmes, int order);
 
