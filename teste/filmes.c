@@ -37,50 +37,33 @@ int adicionarFilme(Filmes *colecaoFilmes, int *numFilmes, Filmes novoFilme) {
 
 /* Listagem com ordenação simples (bubble sort) */
 void listarFilmes(Filmes *colecaoFilmes, int numFilmes, int order) {
-
     if (numFilmes == 0) {
         printf("Nenhum filme registrado.\n");
         return;
     }
 
-    Filmes filmesTemp[MAX_FILMES];
-
-    for (int i = 0; i < numFilmes; i++) {
-        filmesTemp[i] = colecaoFilmes[i];
-    }
-
-    for(int i = 0; i < numFilmes - 1; i++) {
-        for( int j = 0; j < numFilmes - 1 - i; j++) {
-
+    for (int i = 0; i < numFilmes - 1; i++) {
+        for (int j = 0; j < numFilmes - 1 - i; j++) {
             int troca = 0;
 
-            if (order == 0 && filmesTemp[j].code > filmesTemp[j + 1].code) {
-                troca = 1;
-            }
-
-            if (order == 1 && filmesTemp[j].rating < filmesTemp[j + 1].rating) {
-                troca = 1;
-            }
-
-            if(order == 2 && strcmp(filmesTemp[j].title, filmesTemp[j + 1].title) > 0) {
-                troca = 1;
-            }
+            if (order == 0 && colecaoFilmes[j].code > colecaoFilmes[j + 1].code) troca = 1;
+            if (order == 1 && colecaoFilmes[j].rating < colecaoFilmes[j + 1].rating) troca = 1;
+            if (order == 2 && strcmp(colecaoFilmes[j].title, colecaoFilmes[j + 1].title) > 0) troca = 1;
 
             if (troca) {
-                Filmes temp = filmesTemp[j];
-                filmesTemp[j] = filmesTemp[j + 1];
-                filmesTemp[j + 1] = temp;
+                Filmes temp = colecaoFilmes[j];
+                colecaoFilmes[j] = colecaoFilmes[j + 1];
+                colecaoFilmes[j + 1] = temp;
             }
         }
     }
 
     printf("\nCódigo | Titulo                          | Ano | Rating\n");
     printf("----------------------------------------------------\n");
-
     for (int i = 0; i < numFilmes; i++) {
         printf("%4d | %-30s | %4d | %.1f\n",
-            filmesTemp[i].code, filmesTemp[i].title,
-            filmesTemp[i].year, filmesTemp[i].rating);
+               colecaoFilmes[i].code, colecaoFilmes[i].title,
+               colecaoFilmes[i].year, colecaoFilmes[i].rating);
     }
 }
 
