@@ -172,13 +172,26 @@ int consultarFilme(Filmes *colecaoFilmes, int numFilmes, int code) {
 
 /* List movies that contain the text in title/genre/director/actors. */
 void pesquisarFilmes(Filmes *colecaoFilmes, int numFilmes, int tipoPesquisa, char *pesquisa) {
+    int encontrados = 0;
+
+    printf("\n%-5s | %-40s | %-4s | %-6s\n", "Codigo", "Titulo", "Ano", "Rating");
+    printf("----- | ---------------------------------------- | ---- | ------\n");
     for (int i = 0; i < numFilmes; i++) {
-       if ((tipoPesquisa == 1 && contem(colecaoFilmes[i].title, pesquisa)) ||
-           (tipoPesquisa == 2 && contem(colecaoFilmes[i].gender, pesquisa)) ||
-           (tipoPesquisa == 3 && contem(colecaoFilmes[i].director, pesquisa)) ||
-           (tipoPesquisa == 4 && contem(colecaoFilmes[i].actors, pesquisa))) {
-                printf("%4d | %s\n", colecaoFilmes[i].code, colecaoFilmes[i].title);
+        if ((tipoPesquisa == 1 && contem(colecaoFilmes[i].title, pesquisa)) ||
+            (tipoPesquisa == 2 && contem(colecaoFilmes[i].gender, pesquisa)) ||
+            (tipoPesquisa == 3 && contem(colecaoFilmes[i].director, pesquisa)) ||
+            (tipoPesquisa == 4 && contem(colecaoFilmes[i].actors, pesquisa))) {
+            printf("%5d | %-40s | %4d | %6.1f\n",
+                   colecaoFilmes[i].code, colecaoFilmes[i].title,
+                   colecaoFilmes[i].year, colecaoFilmes[i].rating);
+            encontrados++;
         }
+    }
+
+    if (encontrados == 0) {
+        printf("Nenhum filme encontrado para o texto indicado.\n");
+    } else {
+        printf("\nTotal encontrados: %d\n", encontrados);
     }
 }
 

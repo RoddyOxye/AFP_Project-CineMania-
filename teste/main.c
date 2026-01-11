@@ -3,6 +3,9 @@
 #include <string.h>
 #include "filmes.h"
 
+int lerIntIntervalo(const char *msg, int min, int max);
+float lerFloatIntervalo(const char *msg, float min, float max);
+
 /* Read a line from stdin and remove the trailing newline. */
 void lerString(const char *msg, char *dest, int max) {
     printf("%s", msg);
@@ -10,18 +13,50 @@ void lerString(const char *msg, char *dest, int max) {
     dest[strcspn(dest, "\n")] = '\0';
 }
 
-/* Read an integer from stdin (simple conversion). */
-int lerInt(const char *msg) {
-    char string[32];
-    lerString(msg, string, sizeof(string));
-    return atoi(string);
+static int soEspacos(const char *s) {
+    for (int i = 0; s[i]; i++) {
+        if (s[i] != ' ' && s[i] != '\t') return 0;
+    }
+    return 1;
 }
 
-/* Read a float from stdin (simple conversion). */
+/* Read an integer and force numeric input. */
+int lerInt(const char *msg) {
+    char string[64];
+    char *end = NULL;
+
+    while (1) {
+        lerString(msg, string, sizeof(string));
+        if (soEspacos(string)) {
+            printf("Introduza um numero valido.\n");
+            continue;
+        }
+        long v = strtol(string, &end, 10);
+        while (*end == ' ' || *end == '\t') end++;
+        if (*end == '\0') return (int)v;
+        printf("Introduza um numero inteiro valido.\n");
+    }
+}
+
+/* Read a float and force numeric input. */
 float lerFloat(const char *msg) {
-    char string[32];
-    lerString(msg, string, sizeof(string));
-    return atof(string);
+    char string[64];
+    char *end = NULL;
+
+    while (1) {
+        lerString(msg, string, sizeof(string));
+        if (soEspacos(string)) {
+            printf("Introduza um numero valido.\n");
+            continue;
+        }
+        for (int i = 0; string[i]; i++) {
+            if (string[i] == ',') string[i] = '.';
+        }
+        float v = strtof(string, &end);
+        while (*end == ' ' || *end == '\t') end++;
+        if (*end == '\0') return v;
+        printf("Introduza um numero decimal valido.\n");
+    }
 }
 
 /* Main menu loop. */
@@ -52,25 +87,26 @@ int main() {
         printf("9. Exportar ficheiro\n");
         printf("0. Sair\n\n");
 
-        lerString("Opcao: ", opcao, sizeof(opcao));
+        int opcaoMenu = lerIntIntervalo("Opcao: ", 0, 9);
 
-            if (strcmp(opcao, "0") == 0) {
+            if (opcaoMenu == 0) {
                 char confirmar[4]; /* string em vez de char porque assim o utilizador pode escrever "sim" ou "s", pois só verifica a primeira letra */
                 lerString("Confirmar saida (s/n): ", confirmar, 4);
                 if (confirmar[0] == 's' || confirmar[0] == 'S') break;
             }
-            else if (strcmp(opcao, "1") == 0) {
-            listarFilmes(filmes, totalFilmes, lerInt("\nOrdenar por Code (0), Rating (1), Title (2): "));  
+            else if (opcaoMenu == 1) {
+            listarFilmes(filmes, totalFilmes, lerIntIntervalo("\nOrdenar por Code (0), Rating (1), Title (2): ", 0, 2));
             }
-            else if (strcmp(opcao, "2") == 0) {
-            pesquisarFilmes(filmes, totalFilmes,
-                lerInt("1-Titulo 2-Genero 3-Realizador 4-Ator: "),
-                ({ static char texto[128]; lerString("Texto: ", texto, 128); texto; }));
+            else if (opcaoMenu == 2) {
+                pesquisarFilmes(filmes, totalFilmes,
+                    lerIntIntervalo("1-Titulo 2-Genero 3-Realizador 4-Ator: ", 1, 4),
+                    ({ static char texto[128]; lerString("Texto: ", texto, 128); texto; }));
+                lerString("\nPrima Enter para voltar ao menu...", opcao, sizeof(opcao));
             }
-            else if (strcmp(opcao, "3") == 0) {
+            else if (opcaoMenu == 3) {
             consultarFilme(filmes, totalFilmes, lerInt("Codigo: "));
             }
-            else if (strcmp(opcao, "4") == 0) {
+            else if (opcaoMenu == 4) {
                 Filmes novoFilme;
 
                 lerString("Titulo: ", novoFilme.title, MAX_TITLE);
@@ -78,15 +114,15 @@ int main() {
                 lerString("Descricao: ", novoFilme.description, MAX_DESCRIPTION);
                 lerString("Realizador: ", novoFilme.director, MAX_DIRECTOR);
                 lerString("Atores: ", novoFilme.actors, MAX_ACTOR);
-                novoFilme.year = lerInt("Ano: ");
-                novoFilme.duration = lerInt("Duracao (minutos): ");
-                novoFilme.rating = lerFloat("Rating (0.0 - 10.0): ");
-                novoFilme.favorites = lerInt("Numero de favoritos: ");
-                novoFilme.revenue = lerFloat("Receita (em milhoes): ");
-                adicionarFilme(filmes, &totalFilmes, novoFilme);
-                printf("\nFilme adicionado com sucesso!\n");
+            novoFilme.year = lerInt("Ano: ");
+            novoFilme.duration = lerInt("Duracao (minutos): ");
+            novoFilme.rating = lerFloatIntervalo("Rating (0.0 - 10.0): ", 0.0f, 10.0f);
+            novoFilme.favorites = lerInt("Numero de favoritos: ");
+            novoFilme.revenue = lerFloat("Receita (em milhoes): ");
+            adicionarFilme(filmes, &totalFilmes, novoFilme);
+            printf("\nFilme adicionado com sucesso!\n");
             }
-            else if (strcmp(opcao, "5") == 0) {
+            else if (opcaoMenu == 5) {
                 int code = lerInt("Codigo do filme a alterar: ");
                 Filmes novoFilme;
 
@@ -95,23 +131,23 @@ int main() {
                 lerString("Nova Descricao: ", novoFilme.description, MAX_DESCRIPTION);
                 lerString("Novo Realizador: ", novoFilme.director, MAX_DIRECTOR);
                 lerString("Novos Atores: ", novoFilme.actors, MAX_ACTOR);
-                novoFilme.year = lerInt("Novo Ano: ");
-                novoFilme.duration = lerInt("Nova Duracao (minutos): ");
-                novoFilme.rating = lerFloat("Novo Rating (0.0 - 10.0): ");
-                novoFilme.favorites = lerInt("Novo Numero de favoritos: ");
-                novoFilme.revenue = lerFloat("Nova Receita (em milhoes): ");    
-                alterarFilme(filmes, totalFilmes, code, novoFilme);
-                printf("\nFilme alterado com sucesso!\n");
+            novoFilme.year = lerInt("Novo Ano: ");
+            novoFilme.duration = lerInt("Nova Duracao (minutos): ");
+            novoFilme.rating = lerFloatIntervalo("Novo Rating (0.0 - 10.0): ", 0.0f, 10.0f);
+            novoFilme.favorites = lerInt("Novo Numero de favoritos: ");
+            novoFilme.revenue = lerFloat("Nova Receita (em milhoes): ");    
+            alterarFilme(filmes, totalFilmes, code, novoFilme);
+            printf("\nFilme alterado com sucesso!\n");
             }
-            else if (strcmp(opcao, "6") == 0) {
+            else if (opcaoMenu == 6) {
                 removerFilme(filmes, &totalFilmes, lerInt("Codigo do filme a remover: "));
                 printf("\nFilme removido com sucesso!\n");
             }
-            else if (strcmp(opcao, "7") == 0) {
+            else if (opcaoMenu == 7) {
                 limparFilmes(filmes, &totalFilmes);
                 printf("\nTodos os filmes foram removidos!\n");
             }
-        else if (strcmp(opcao, "8") == 0) {
+        else if (opcaoMenu == 8) {
             int importados = importarFicheiro(filmes, &totalFilmes,
                 ({ static char filename[128]; lerString("Nome do ficheiro para importar: ", filename, 128); filename; }));
             if (importados > 0) {
@@ -120,7 +156,7 @@ int main() {
                 printf("\nFalha na importacao ou nenhum filme importado.\n");
             }
         }
-            else if (strcmp(opcao, "9") == 0) {
+            else if (opcaoMenu == 9) {
               exportarFicheiro(filmes, totalFilmes,
                     ({ static char filename[128]; lerString("Nome do ficheiro para exportar: ", filename, 128); filename; }));
                 printf("\nFicheiro exportado com sucesso!\n");
@@ -130,4 +166,21 @@ int main() {
             }    
         }
     return 0;
+}
+/* Read an integer within a range (inclusive). */
+int lerIntIntervalo(const char *msg, int min, int max) {
+    while (1) {
+        int v = lerInt(msg);
+        if (v >= min && v <= max) return v;
+        printf("Introduza um numero entre %d e %d.\n", min, max);
+    }
+}
+
+/* Read a float within a range (inclusive). */
+float lerFloatIntervalo(const char *msg, float min, float max) {
+    while (1) {
+        float v = lerFloat(msg);
+        if (v >= min && v <= max) return v;
+        printf("Introduza um numero entre %.1f e %.1f.\n", min, max);
+    }
 }
