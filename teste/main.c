@@ -3,24 +3,28 @@
 #include <string.h>
 #include "filmes.h"
 
+/* Read a line from stdin and remove the trailing newline. */
 void lerString(const char *msg, char *dest, int max) {
     printf("%s", msg);
     fgets(dest, max, stdin);
     dest[strcspn(dest, "\n")] = '\0';
 }
 
+/* Read an integer from stdin (simple conversion). */
 int lerInt(const char *msg) {
     char string[32];
     lerString(msg, string, sizeof(string));
     return atoi(string);
 }
 
+/* Read a float from stdin (simple conversion). */
 float lerFloat(const char *msg) {
     char string[32];
     lerString(msg, string, sizeof(string));
     return atof(string);
 }
 
+/* Main menu loop. */
 int main() {
 
     Filmes filmes[MAX_FILMES];

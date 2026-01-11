@@ -7,6 +7,8 @@
 #define MAX_IMPORT_BYTES (1024 * 1024)
 #define MAX_LINE_LEN 4096
 
+/* Remove spaces at the start and end of a string. */
+
 static void trim_whitespace(char *s) {
     size_t len = strlen(s);
     size_t start = 0;
@@ -22,12 +24,14 @@ static void trim_whitespace(char *s) {
     s[len - start] = '\0';
 }
 
+/* Accept comma as decimal separator and convert to dot. */
 static void normalize_decimal(char *s) {
     for (size_t i = 0; s[i]; i++) {
         if (s[i] == ',') s[i] = '.';
     }
 }
 
+/* Parse one CSV line with ';' and handle quoted fields. */
 static int parse_csv_line(const char *line, char fields[][512], int max_fields) {
     int f = 0;
     int i = 0;
@@ -62,6 +66,7 @@ static int parse_csv_line(const char *line, char fields[][512], int max_fields) 
     return f;
 }
 
+/* Detect header line ("code" or "codigo"). */
 static int is_header_line(const char *field0) {
     char tmp[32];
     size_t n = strlen(field0);
@@ -73,13 +78,14 @@ static int is_header_line(const char *field0) {
     return strcmp(tmp, "code") == 0 || strcmp(tmp, "codigo") == 0;
 }
 
+/* Avoid trying to parse .xlsx with the CSV parser. */
 static int has_xlsx_extension(const char *filename) {
     const char *dot = strrchr(filename, '.');
     if (!dot) return 0;
     return strcmp(dot, ".xlsx") == 0 || strcmp(dot, ".XLSX") == 0;
 }
 
-/*Converter string para minúsculas*/
+/* Convert a string to lowercase. */
 static void toLower(const char *textoOriginal, char *textoConvertido) {
     int i = 0;
     while (textoOriginal[i]) {
@@ -89,7 +95,7 @@ static void toLower(const char *textoOriginal, char *textoConvertido) {
     textoConvertido[i] = '\0';
 }
 
-/* Pesquisa ignorando maiúsculas/minúsculas */
+/* Search ignoring upper/lower case. */
 static int contem(const char *campo, const char *pesquisa) {
     char campoAux[512], pesquisaAux[256];
     toLower(campo, campoAux);
@@ -97,11 +103,12 @@ static int contem(const char *campo, const char *pesquisa) {
     return strstr(campoAux, pesquisaAux) != NULL;
 }
 
+/* Initialize the collection as empty. */
 void inicializarColecao(Filmes *colecaoFilmes, int *numFilmes) {
     *numFilmes = 0;
 }
 
-/* Adiciona filme com código automático */
+/* Add a movie to the end of the array, if there is space. */
 int adicionarFilme(Filmes *colecaoFilmes, int *numFilmes, Filmes novoFilme) {
     if (*numFilmes >= MAX_FILMES) {
         return 0; // Coleção cheia
@@ -111,7 +118,7 @@ int adicionarFilme(Filmes *colecaoFilmes, int *numFilmes, Filmes novoFilme) {
     return 1; // Filme adicionado com sucesso
 }
 
-/* Listagem com ordenação simples (bubble sort) */
+/* List movies with a simple sort (bubble sort). */
 void listarFilmes(Filmes *colecaoFilmes, int numFilmes, int order) {
     if (numFilmes == 0) {
         printf("Nenhum filme registrado.\n");
@@ -143,6 +150,7 @@ void listarFilmes(Filmes *colecaoFilmes, int numFilmes, int order) {
     }
 }
 
+/* Show details of a movie by code. */
 int consultarFilme(Filmes *colecaoFilmes, int numFilmes, int code) {
     for (int i = 0; i < numFilmes; i++) {
         if (colecaoFilmes[i].code == code) {
@@ -162,6 +170,7 @@ int consultarFilme(Filmes *colecaoFilmes, int numFilmes, int code) {
     return 0; // Filme não encontrado
 }
 
+/* List movies that contain the text in title/genre/director/actors. */
 void pesquisarFilmes(Filmes *colecaoFilmes, int numFilmes, int tipoPesquisa, char *pesquisa) {
     for (int i = 0; i < numFilmes; i++) {
        if ((tipoPesquisa == 1 && contem(colecaoFilmes[i].title, pesquisa)) ||
@@ -173,6 +182,7 @@ void pesquisarFilmes(Filmes *colecaoFilmes, int numFilmes, int tipoPesquisa, cha
     }
 }
 
+/* Replace a movie but keep its original code. */
 int alterarFilme(Filmes *colecaoFilmes, int numFilmes, int code, Filmes novo) {
    for(int i = 0; i < numFilmes; i++) {
        if (colecaoFilmes[i].code == code) {
@@ -184,6 +194,7 @@ int alterarFilme(Filmes *colecaoFilmes, int numFilmes, int code, Filmes novo) {
    return 0; // Filme não encontrado
 }
 
+/* Remove a movie and shift the rest left. */
 int removerFilme(Filmes *colecaoFilmes, int *numFilmes, int code) {
     for (int i = 0; i < *numFilmes; i++) {
         if (colecaoFilmes[i].code == code) {
@@ -197,10 +208,12 @@ int removerFilme(Filmes *colecaoFilmes, int *numFilmes, int code) {
     return 0; // Filme não encontrado
 }
 
+/* Clear all movies from the collection. */
 void limparFilmes(Filmes *colecaoFilmes, int *numFilmes) {
     *numFilmes = 0;
 }
 
+/* Import a CSV file; returns how many movies were added. */
 int importarFicheiro(Filmes *colecaoFilmes, int *numFilmes, const char *filename) {
     if (has_xlsx_extension(filename)) {
         printf("Formato .xlsx nao suportado. Exporte para .csv.\n");
@@ -269,6 +282,7 @@ int importarFicheiro(Filmes *colecaoFilmes, int *numFilmes, const char *filename
     return importados; // Numero de filmes importados
 }
 
+/* Export movies to CSV; returns 1 on success. */
 int exportarFicheiro(Filmes *colecaoFilmes, int numFilmes, const char *filename) {
     FILE *f = fopen(filename, "w");
     if (!f) {
