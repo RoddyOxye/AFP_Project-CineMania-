@@ -58,10 +58,10 @@ void listarFilmes(Filmes *colecaoFilmes, int numFilmes, int order) {
         }
     }
 
-    printf("\nCódigo | Titulo                          | Ano | Rating\n");
-    printf("----------------------------------------------------\n");
+    printf("\n%-5s | %-40s | %-4s | %-6s\n", "Codigo", "Titulo", "Ano", "Rating");
+    printf("----- | ---------------------------------------- | ---- | ------\n");
     for (int i = 0; i < numFilmes; i++) {
-        printf("%4d | %-30s | %4d | %.1f\n",
+        printf("%5d | %-40s | %4d | %6.1f\n",
                colecaoFilmes[i].code, colecaoFilmes[i].title,
                colecaoFilmes[i].year, colecaoFilmes[i].rating);
     }
