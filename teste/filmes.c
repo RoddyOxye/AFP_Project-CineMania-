@@ -2,6 +2,82 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
+
+#define MAX_IMPORT_BYTES (1024 * 1024)
+#define MAX_LINE_LEN 4096
+
+static void trim_whitespace(char *s) {
+    size_t len = strlen(s);
+    size_t start = 0;
+    while (s[start] && isspace((unsigned char)s[start])) {
+        start++;
+    }
+    while (len > start && isspace((unsigned char)s[len - 1])) {
+        len--;
+    }
+    if (start > 0) {
+        memmove(s, s + start, len - start);
+    }
+    s[len - start] = '\0';
+}
+
+static void normalize_decimal(char *s) {
+    for (size_t i = 0; s[i]; i++) {
+        if (s[i] == ',') s[i] = '.';
+    }
+}
+
+static int parse_csv_line(const char *line, char fields[][512], int max_fields) {
+    int f = 0;
+    int i = 0;
+    while (line[i] && f < max_fields) {
+        int pos = 0;
+        if (line[i] == '"') {
+            i++;
+            while (line[i] && line[i] != '\n' && line[i] != '\r') {
+                if (line[i] == '"' && line[i + 1] == '"') {
+                    if (pos < 511) fields[f][pos++] = '"';
+                    i += 2;
+                    continue;
+                }
+                if (line[i] == '"') {
+                    i++;
+                    break;
+                }
+                if (pos < 511) fields[f][pos++] = line[i];
+                i++;
+            }
+        } else {
+            while (line[i] && line[i] != ';' && line[i] != '\n' && line[i] != '\r') {
+                if (pos < 511) fields[f][pos++] = line[i];
+                i++;
+            }
+        }
+        fields[f][pos] = '\0';
+        if (line[i] == ';') i++;
+        f++;
+        while (line[i] == '\r' || line[i] == '\n') i++;
+    }
+    return f;
+}
+
+static int is_header_line(const char *field0) {
+    char tmp[32];
+    size_t n = strlen(field0);
+    if (n >= sizeof(tmp)) n = sizeof(tmp) - 1;
+    for (size_t i = 0; i < n; i++) {
+        tmp[i] = (char)tolower((unsigned char)field0[i]);
+    }
+    tmp[n] = '\0';
+    return strcmp(tmp, "code") == 0 || strcmp(tmp, "codigo") == 0;
+}
+
+static int has_xlsx_extension(const char *filename) {
+    const char *dot = strrchr(filename, '.');
+    if (!dot) return 0;
+    return strcmp(dot, ".xlsx") == 0 || strcmp(dot, ".XLSX") == 0;
+}
 
 /*Converter string para minúsculas*/
 static void toLower(const char *textoOriginal, char *textoConvertido) {
@@ -126,22 +202,71 @@ void limparFilmes(Filmes *colecaoFilmes, int *numFilmes) {
 }
 
 int importarFicheiro(Filmes *colecaoFilmes, int *numFilmes, const char *filename) {
-    FILE *f = fopen(filename, "r"); 
+    if (has_xlsx_extension(filename)) {
+        printf("Formato .xlsx nao suportado. Exporte para .csv.\n");
+        return 0;
+    }
+
+    FILE *f = fopen(filename, "r");
     if (!f) {
         return 0; // Falha ao abrir o ficheiro
     }
 
-    Filmes filmeTemp;
-    while (fscanf(f, "%d;%127[^;];%63[^;];%255[^;];%63[^;];%127[^;];%d;%d;%f;%d;%f\n",
-        &filmeTemp.code, filmeTemp.title, filmeTemp.gender, filmeTemp.description,
-        filmeTemp.director, filmeTemp.actors, &filmeTemp.year, &filmeTemp.duration,
-        &filmeTemp.rating, &filmeTemp.favorites, &filmeTemp.revenue) == 11) {
+    if (fseek(f, 0, SEEK_END) == 0) {
+        long size = ftell(f);
+        rewind(f);
+        if (size > MAX_IMPORT_BYTES) {
+            printf("Ficheiro muito grande (%.2f MB). Confirmar importacao (s/n): ",
+                   size / (1024.0 * 1024.0));
+            char resp[8];
+            if (!fgets(resp, sizeof(resp), stdin) ||
+                (resp[0] != 's' && resp[0] != 'S')) {
+                fclose(f);
+                return 0;
+            }
+        }
+    }
+
+    int importados = 0;
+    char line[MAX_LINE_LEN];
+    while (fgets(line, sizeof(line), f)) {
+        char campos[11][512];
+        int total = parse_csv_line(line, campos, 11);
+        if (total < 11) continue;
+        if (is_header_line(campos[0])) continue;
+
+        for (int i = 0; i < 11; i++) {
+            trim_whitespace(campos[i]);
+        }
+        normalize_decimal(campos[8]);
+        normalize_decimal(campos[10]);
+
+        if (*numFilmes >= MAX_FILMES) break;
+
+        Filmes filmeTemp;
+        filmeTemp.code = (int)strtol(campos[0], NULL, 10);
+        strncpy(filmeTemp.title, campos[1], MAX_TITLE - 1);
+        filmeTemp.title[MAX_TITLE - 1] = '\0';
+        strncpy(filmeTemp.gender, campos[2], MAX_GENRE - 1);
+        filmeTemp.gender[MAX_GENRE - 1] = '\0';
+        strncpy(filmeTemp.description, campos[3], MAX_DESCRIPTION - 1);
+        filmeTemp.description[MAX_DESCRIPTION - 1] = '\0';
+        strncpy(filmeTemp.director, campos[4], MAX_DIRECTOR - 1);
+        filmeTemp.director[MAX_DIRECTOR - 1] = '\0';
+        strncpy(filmeTemp.actors, campos[5], MAX_ACTOR - 1);
+        filmeTemp.actors[MAX_ACTOR - 1] = '\0';
+        filmeTemp.year = (int)strtol(campos[6], NULL, 10);
+        filmeTemp.duration = (int)strtol(campos[7], NULL, 10);
+        filmeTemp.rating = strtof(campos[8], NULL);
+        filmeTemp.favorites = (int)strtol(campos[9], NULL, 10);
+        filmeTemp.revenue = strtof(campos[10], NULL);
 
         colecaoFilmes[*numFilmes] = filmeTemp;
         (*numFilmes)++;
+        importados++;
     }
     fclose(f);
-    return 1; // Importação bem-sucedida
+    return importados; // Numero de filmes importados
 }
 
 int exportarFicheiro(Filmes *colecaoFilmes, int numFilmes, const char *filename) {

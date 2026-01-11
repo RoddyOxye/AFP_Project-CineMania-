@@ -107,11 +107,15 @@ int main() {
                 limparFilmes(filmes, &totalFilmes);
                 printf("\nTodos os filmes foram removidos!\n");
             }
-            else if (strcmp(opcao, "8") == 0) {
-                importarFicheiro(filmes, &totalFilmes,
-                    ({ static char filename[128]; lerString("Nome do ficheiro para importar: ", filename, 128); filename; }));
-                    printf("\nFicheiro importado com sucesso!\n");
+        else if (strcmp(opcao, "8") == 0) {
+            int importados = importarFicheiro(filmes, &totalFilmes,
+                ({ static char filename[128]; lerString("Nome do ficheiro para importar: ", filename, 128); filename; }));
+            if (importados > 0) {
+                printf("\nImportados %d filmes.\n", importados);
+            } else {
+                printf("\nFalha na importacao ou nenhum filme importado.\n");
             }
+        }
             else if (strcmp(opcao, "9") == 0) {
               exportarFicheiro(filmes, totalFilmes,
                     ({ static char filename[128]; lerString("Nome do ficheiro para exportar: ", filename, 128); filename; }));
