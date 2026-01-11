@@ -102,7 +102,7 @@ int main() {
             novoFilme.rating = lerFloat("Novo Rating (0.0 - 10.0): ");
             novoFilme.favorites = lerInt("Novo Numero de favoritos: ");
             novoFilme.revenue = lerFloat("Nova Receita (em milhoes): ");    
-            alteraFilme(filmes, totalFilmes, code, novoFilme);
+            alterarFilme(filmes, totalFilmes, code, novoFilme);
             printf("\nFilme alterado com sucesso!\n");
         }
         else if (strcmp(opcao, "6") == 0) {

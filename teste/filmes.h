@@ -29,11 +29,11 @@ void inicializaColecao(Filmes *colecaoFilmes, int *numFilmes);
 
 int adicionaFilme(Filmes *colecaoFilmes, int *numFilmes, Filmes novoFilme);
 
-void listaFilmes(Filmes *colecaoFilmes, int numFilmes, int order);
+void listarFilmes(Filmes *colecaoFilmes, int numFilmes, int order);
 
 int consultarFilme(Filmes *colecaoFilmes, int numFilmes, int code);
 
-void pesquisaFilmes(Filmes *colecaoFilmes, int numFilmes, int tipoPesquisa, char *pesquisa);
+void pesquisarFilmes(Filmes *colecaoFilmes, int numFilmes, int tipoPesquisa, char *pesquisa);
 
 /*Fase 2*/
 
