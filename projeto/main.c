@@ -23,6 +23,7 @@ static int soEspacos(const char *s) {
     for (int i = 0; s[i]; i++) {
         if (s[i] != ' ' && s[i] != '\t') return 0;
     }
+    /* Only spaces/tabs were found. */
     return 1;
 }
 
@@ -33,10 +34,12 @@ int lerInt(const char *msg) {
 
     while (1) {
         lerString(msg, string, sizeof(string));
+        /* Reject empty input or just spaces. */
         if (soEspacos(string)) {
             printf("Introduza um numero valido.\n");
             continue;
         }
+        /* Convert and check if the whole input was a number. */
         long v = strtol(string, &end, 10);
         while (*end == ' ' || *end == '\t') end++;
         if (*end == '\0') return (int)v;
@@ -51,13 +54,16 @@ float lerFloat(const char *msg) {
 
     while (1) {
         lerString(msg, string, sizeof(string));
+        /* Reject empty input or just spaces. */
         if (soEspacos(string)) {
             printf("Introduza um numero valido.\n");
             continue;
         }
+        /* Allow decimal comma by converting to dot. */
         for (int i = 0; string[i]; i++) {
             if (string[i] == ',') string[i] = '.';
         }
+        /* Convert and check if the whole input was a number. */
         float v = strtof(string, &end);
         while (*end == ' ' || *end == '\t') end++;
         if (*end == '\0') return v;
@@ -185,6 +191,7 @@ int main() {
 int lerIntIntervalo(const char *msg, int min, int max) {
     while (1) {
         int v = lerInt(msg);
+        /* Keep asking until the value is inside [min, max]. */
         if (v >= min && v <= max) return v;
         printf("Introduza um numero entre %d e %d.\n", min, max);
     }
@@ -194,6 +201,7 @@ int lerIntIntervalo(const char *msg, int min, int max) {
 float lerFloatIntervalo(const char *msg, float min, float max) {
     while (1) {
         float v = lerFloat(msg);
+        /* Keep asking until the value is inside [min, max]. */
         if (v >= min && v <= max) return v;
         printf("Introduza um numero entre %.1f e %.1f.\n", min, max);
     }

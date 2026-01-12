@@ -12,15 +12,19 @@
 static void trim_whitespace(char *s) {
     size_t len = strlen(s);
     size_t start = 0;
+    /* Find first non-space character. */
     while (s[start] && isspace((unsigned char)s[start])) {
         start++;
     }
+    /* Find last non-space character. */
     while (len > start && isspace((unsigned char)s[len - 1])) {
         len--;
     }
     if (start > 0) {
+        /* Move the content to the start of the string. */
         memmove(s, s + start, len - start);
     }
+    /* Add final '\0' after trimming. */
     s[len - start] = '\0';
 }
 
@@ -31,24 +35,24 @@ static void normalize_decimal(char *s) {
     }
 }
 
-/* Parse one CSV line with ';' and handle quoted fields.
-   - Reads fields until max_fields or end of line.
-   - Supports quoted fields with "" to represent a quote.
-   - Removes separators and keeps only the field text. */
+/* Parse one CSV line with ';' and handle quoted fields. */
 static int parse_csv_line(const char *line, char fields[][512], int max_fields) {
     int f = 0;
     int i = 0;
     while (line[i] && f < max_fields) {
         int pos = 0;
         if (line[i] == '"') {
+            /* Quoted field: start after the opening quote. */
             i++;
             while (line[i] && line[i] != '\n' && line[i] != '\r') {
                 if (line[i] == '"' && line[i + 1] == '"') {
+                    /* "" inside a quoted field means a literal quote. */
                     if (pos < 511) fields[f][pos++] = '"';
                     i += 2;
                     continue;
                 }
                 if (line[i] == '"') {
+                    /* Closing quote ends the field. */
                     i++;
                     break;
                 }
@@ -56,14 +60,18 @@ static int parse_csv_line(const char *line, char fields[][512], int max_fields) 
                 i++;
             }
         } else {
+            /* Unquoted field: copy until separator or end-of-line. */
             while (line[i] && line[i] != ';' && line[i] != '\n' && line[i] != '\r') {
                 if (pos < 511) fields[f][pos++] = line[i];
                 i++;
             }
         }
+        /* Finish the current field as a C string. */
         fields[f][pos] = '\0';
+        /* If we stopped at a ';', move past it to start the next field. */
         if (line[i] == ';') i++;
         f++;
+        /* Skip any end-of-line characters before reading the next field. */
         while (line[i] == '\r' || line[i] == '\n') i++;
     }
     return f;
@@ -73,8 +81,10 @@ static int parse_csv_line(const char *line, char fields[][512], int max_fields) 
 static int is_header_line(const char *field0) {
     char tmp[32];
     size_t n = strlen(field0);
+    /* Limit to tmp size to avoid overflow. */
     if (n >= sizeof(tmp)) n = sizeof(tmp) - 1;
     for (size_t i = 0; i < n; i++) {
+        /* Compare in lowercase to avoid case issues. */
         tmp[i] = (char)tolower((unsigned char)field0[i]);
     }
     tmp[n] = '\0';
@@ -132,11 +142,13 @@ void listarFilmes(Filmes *colecaoFilmes, int numFilmes, int order) {
         for (int j = 0; j < numFilmes - 1 - i; j++) {
             int troca = 0;
 
+            /* Choose what to compare based on the order option. */
             if (order == 0 && colecaoFilmes[j].code > colecaoFilmes[j + 1].code) troca = 1;
             if (order == 1 && colecaoFilmes[j].rating < colecaoFilmes[j + 1].rating) troca = 1;
             if (order == 2 && strcmp(colecaoFilmes[j].title, colecaoFilmes[j + 1].title) > 0) troca = 1;
 
             if (troca) {
+                /* Swap the two elements. */
                 Filmes temp = colecaoFilmes[j];
                 colecaoFilmes[j] = colecaoFilmes[j + 1];
                 colecaoFilmes[j + 1] = temp;
@@ -203,6 +215,7 @@ int alterarFilme(Filmes *colecaoFilmes, int numFilmes, int code, Filmes novo) {
    for(int i = 0; i < numFilmes; i++) {
        if (colecaoFilmes[i].code == code) {
            colecaoFilmes[i] = novo;
+           /* Keep original code so it does not change. */
            colecaoFilmes[i].code = code; // Mantém o código original
            return 1; // Filme alterado com sucesso
        }
@@ -214,6 +227,7 @@ int alterarFilme(Filmes *colecaoFilmes, int numFilmes, int code, Filmes novo) {
 int removerFilme(Filmes *colecaoFilmes, int *numFilmes, int code) {
     for (int i = 0; i < *numFilmes; i++) {
         if (colecaoFilmes[i].code == code) {
+            /* Shift left to remove the gap. */
             for (int j = i; j < *numFilmes - 1; j++) {
                 colecaoFilmes[j] = colecaoFilmes[j + 1];
             }
@@ -244,6 +258,7 @@ int importarFicheiro(Filmes *colecaoFilmes, int *numFilmes, const char *filename
     if (fseek(f, 0, SEEK_END) == 0) {
         long size = ftell(f);
         rewind(f);
+        /* Ask for confirmation if file is too large. */
         if (size > MAX_IMPORT_BYTES) {
             printf("Ficheiro muito grande (%.2f MB). Confirmar importacao (s/n): ",
                    size / (1024.0 * 1024.0));
@@ -261,19 +276,24 @@ int importarFicheiro(Filmes *colecaoFilmes, int *numFilmes, const char *filename
     while (fgets(line, sizeof(line), f)) {
         char campos[11][512];
         int total = parse_csv_line(line, campos, 11);
+        /* Skip incomplete lines and header. */
         if (total < 11) continue;
         if (is_header_line(campos[0])) continue;
 
         for (int i = 0; i < 11; i++) {
             trim_whitespace(campos[i]);
         }
+        /* Ratings and revenue may come with comma decimals. */
         normalize_decimal(campos[8]);
         normalize_decimal(campos[10]);
 
+        /* Stop if we already reached max capacity. */
         if (*numFilmes >= MAX_FILMES) break;
 
         Filmes filmeTemp;
+        /* Convert strings to numbers. */
         filmeTemp.code = (int)strtol(campos[0], NULL, 10);
+        /* Copy text fields and force final '\0'. */
         strncpy(filmeTemp.title, campos[1], MAX_TITLE - 1);
         filmeTemp.title[MAX_TITLE - 1] = '\0';
         strncpy(filmeTemp.gender, campos[2], MAX_GENRE - 1);
@@ -290,6 +310,7 @@ int importarFicheiro(Filmes *colecaoFilmes, int *numFilmes, const char *filename
         filmeTemp.favorites = (int)strtol(campos[9], NULL, 10);
         filmeTemp.revenue = strtof(campos[10], NULL);
 
+        /* Save the movie in the array. */
         colecaoFilmes[*numFilmes] = filmeTemp;
         (*numFilmes)++;
         importados++;
@@ -306,6 +327,7 @@ int exportarFicheiro(Filmes *colecaoFilmes, int numFilmes, const char *filename)
     }
 
      for (int i = 0; i < numFilmes; i++) {
+        /* Write one CSV line per movie. */
         fprintf(f, "%d;%s;%s;%s;%s;%s;%d;%d;%.1f;%d;%.2f\n",
             colecaoFilmes[i].code, colecaoFilmes[i].title, colecaoFilmes[i].gender, colecaoFilmes[i].description,
             colecaoFilmes[i].director, colecaoFilmes[i].actors, colecaoFilmes[i].year, colecaoFilmes[i].duration,
