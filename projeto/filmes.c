@@ -31,7 +31,10 @@ static void normalize_decimal(char *s) {
     }
 }
 
-/* Parse one CSV line with ';' and handle quoted fields. */
+/* Parse one CSV line with ';' and handle quoted fields.
+   - Reads fields until max_fields or end of line.
+   - Supports quoted fields with "" to represent a quote.
+   - Removes separators and keeps only the field text. */
 static int parse_csv_line(const char *line, char fields[][512], int max_fields) {
     int f = 0;
     int i = 0;

@@ -13,6 +13,12 @@ void lerString(const char *msg, char *dest, int max) {
     dest[strcspn(dest, "\n")] = '\0';
 }
 
+/* Wait for Enter before returning to the menu. */
+void esperarEnter(void) {
+    char tmp[4];
+    lerString("\nPrima Enter para voltar ao menu...", tmp, sizeof(tmp));
+}
+
 static int soEspacos(const char *s) {
     for (int i = 0; s[i]; i++) {
         if (s[i] != ' ' && s[i] != '\t') return 0;
@@ -96,15 +102,17 @@ int main() {
             }
             else if (opcaoMenu == 1) {
             listarFilmes(filmes, totalFilmes, lerIntIntervalo("\nOrdenar por Code (0), Rating (1), Title (2): ", 0, 2));
+            esperarEnter();
             }
             else if (opcaoMenu == 2) {
                 pesquisarFilmes(filmes, totalFilmes,
                     lerIntIntervalo("1-Titulo 2-Genero 3-Realizador 4-Ator: ", 1, 4),
                     ({ static char texto[128]; lerString("Texto: ", texto, 128); texto; }));
-                lerString("\nPrima Enter para voltar ao menu...", opcao, sizeof(opcao));
+                esperarEnter();
             }
             else if (opcaoMenu == 3) {
             consultarFilme(filmes, totalFilmes, lerInt("Codigo: "));
+            esperarEnter();
             }
             else if (opcaoMenu == 4) {
                 Filmes novoFilme;
@@ -121,6 +129,7 @@ int main() {
             novoFilme.revenue = lerFloat("Receita (em milhoes): ");
             adicionarFilme(filmes, &totalFilmes, novoFilme);
             printf("\nFilme adicionado com sucesso!\n");
+            esperarEnter();
             }
             else if (opcaoMenu == 5) {
                 int code = lerInt("Codigo do filme a alterar: ");
@@ -138,14 +147,17 @@ int main() {
             novoFilme.revenue = lerFloat("Nova Receita (em milhoes): ");    
             alterarFilme(filmes, totalFilmes, code, novoFilme);
             printf("\nFilme alterado com sucesso!\n");
+            esperarEnter();
             }
             else if (opcaoMenu == 6) {
                 removerFilme(filmes, &totalFilmes, lerInt("Codigo do filme a remover: "));
                 printf("\nFilme removido com sucesso!\n");
+                esperarEnter();
             }
             else if (opcaoMenu == 7) {
                 limparFilmes(filmes, &totalFilmes);
                 printf("\nTodos os filmes foram removidos!\n");
+                esperarEnter();
             }
         else if (opcaoMenu == 8) {
             int importados = importarFicheiro(filmes, &totalFilmes,
@@ -155,11 +167,13 @@ int main() {
             } else {
                 printf("\nFalha na importacao ou nenhum filme importado.\n");
             }
+            esperarEnter();
         }
             else if (opcaoMenu == 9) {
               exportarFicheiro(filmes, totalFilmes,
                     ({ static char filename[128]; lerString("Nome do ficheiro para exportar: ", filename, 128); filename; }));
                 printf("\nFicheiro exportado com sucesso!\n");
+                esperarEnter();
             }
             else {
                 printf("\nOpcao invalida. Tente novamente.\n");
