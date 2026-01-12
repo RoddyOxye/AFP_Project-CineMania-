@@ -1,40 +1,50 @@
 #ifndef FILMESH
 #define FILMESH
 
-#include <stdbool.h>
+#define MAX_FILMES 2000
+#define MAX_TITLE 128
+#define MAX_GENRE 64
+#define MAX_DESCRIPTION 256
+#define MAX_DIRECTOR 64
+#define MAX_ACTOR 128
 
-#define MAXFILMES 2000
-#define MAXTITLE 128
-#define MAXGENRES 64
-#define MAXDESCRIPTION 256
-#define MAXDIRECTOR 64
-#define MAXACTORS 128
-
-typedef struct Filme {
+typedef struct 
+{
     int code;
-    char title[MAXTITLE];
-    char genres[MAXGENRES];
-    char description[MAXDESCRIPTION];
-    char director[MAXDIRECTOR];
-    char actors[MAXACTORS];
+    char title[MAX_TITLE];
+    char gender[MAX_GENRE];
+    char description[MAX_DESCRIPTION];
+    char director[MAX_DIRECTOR];
+    char actors[MAX_ACTOR];
     int year;
     int duration;
     float rating;
-    bool favorite;
+    int favorites;
     float revenue;
-} Filme;
+} Filmes;
 
-void inicializarColecao(Filme *colecao, int *count);
+/*Fase 1*/
 
-int adicionarFilme(Filme *colecao, int *count, const Filme *novo);
+void inicializarColecao(Filmes *colecaoFilmes, int *numFilmes);
 
-int consultarCode(Filme *colecao, int count, int code);
+int adicionarFilme(Filmes *colecaoFilmes, int *numFilmes, Filmes novoFilme);
 
-void listarTodos(Filme *colecao, int count, int orden);
+void listarFilmes(Filmes *colecaoFilmes, int numFilmes, int order);
 
-int pesquisarTitulo(Filme *colecao, int count, const char *substr);
-int pesquisarGenero(Filme *colecao, int count, const char *genre);
-int pesquisarRealizador(Filme *colecao, int count, const char *director);
-int pesquisarAtor(Filme *colecao, int count, const char *actor);
+int consultarFilme(Filmes *colecaoFilmes, int numFilmes, int code);
+
+void pesquisarFilmes(Filmes *colecaoFilmes, int numFilmes, int tipoPesquisa, char *pesquisa);
+
+/*Fase 2*/
+
+int alterarFilme(Filmes *colecaoFilmes, int numFilmes, int code, Filmes novo);
+
+int removerFilme(Filmes *colecaoFilmes, int *numFilmes, int code);
+
+void limparFilmes(Filmes *colecaoFilmes, int *numFilmes);
+
+int importarFicheiro(Filmes *colecaoFilmes, int *numFilmes, const char *filename);
+
+int exportarFicheiro(Filmes *colecaoFilmes, int numFilmes, const char *filename);
 
 #endif
